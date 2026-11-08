@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vfxforge.local/schemas/export-profile.schema.json",
+  "title": "VFXForge Image Sequence and Sprite Sheet Export Profile",
+  "description": "Engine-independent P0 export settings. Pixels are rendered from the canonical effect timeline; atlas rectangles use top-left origin and half-open pixel bounds.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile_id", "version", "format", "fps", "frame_range", "canvas", "color_space", "alpha_mode", "output"],
+  "allOf": [
+    {
+      "if": {"properties": {"format": {"const": "sprite_sheet"}}, "required": ["format"]},
+      "then": {"required": ["sprite_sheet", "atlas_schema"]}
+    },
+    {
+      "if": {"properties": {"format": {"const": "png_sequence"}}, "required": ["format"]},
+      "then": {
+        "not": {
+          "anyOf": [
+            {"required": ["sprite_sheet"]},
+            {"required": ["atlas_schema"]}
+          ]
+        }
+      }
+    }
+  ],
+  "properties": {
+    "profile_id": {"type": "string", "minLength": 1},
+    "version": {"type": "integer", "minimum": 1},
+    "format": {"enum": ["png_sequence", "sprite_sheet"]},
+    "fps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": {"type": "integer", "minimum": 1, "maximum": 1000000},
+        "denominator": {"type": "integer", "minimum": 1, "maximum": 1000000}
+      }
+    },
+    "frame_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_inclusive", "end_exclusive"],
+      "properties": {
+        "start_inclusive": {"type": "integer", "minimum": 0},
+        "end_exclusive": {"type": "integer", "minimum": 1}
+      }
+    },
+    "canvas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": {"type": "integer", "minimum": 1, "maximum": 32768},
+        "height": {"type": "integer", "minimum": 1, "maximum": 32768}
+      }
+    },
+    "color_space": {"enum": ["srgb", "linear-srgb"]},
+    "alpha_mode": {"enum": ["straight", "premultiplied"]},
+    "transparent_background": {"type": "boolean"},
+    "seed": {"type": "integer", "minimum": 0},
+    "sprite_sheet": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_width": {"type": "integer", "minimum": 1, "maximum": 32768},
+        "max_height": {"type": "integer", "minimum": 1, "maximum": 32768},
+        "padding": {"type": "integer", "minimum": 0},
+        "extrude": {"type": "integer", "minimum": 0},
+        "power_of_two": {"type": "boolean"},
+        "allow_rotation": {"const": false},
+        "trim_transparent": {"type": "boolean"}
+      }
+    },
+    "atlas_schema": {"const": "vfxforge-atlas/v1"},
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["directory", "overwrite_policy"],
+      "properties": {
+        "directory": {"type": "string", "minLength": 1},
+        "name_template": {"type": "string", "minLength": 1},
+        "overwrite_policy": {"enum": ["fail", "replace_after_confirmation", "versioned"]},
+        "include_preview": {"type": "boolean"},
+        "include_manifest": {"type": "boolean", "const": true}
+      }
+    }
+  }
+}

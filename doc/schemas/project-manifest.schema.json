@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vfxforge.local/schemas/project-manifest.schema.json",
+  "title": "VFXForge Project Manifest",
+  "description": "Portable source-of-truth manifest for a VFXForge project package. Runtime caches and AI previews are derived data and are not required to reopen the source project.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format_id", "format_version", "project_id", "revision", "name", "created_utc", "modified_utc", "units", "color_space", "alpha_mode", "asset_index", "effects"],
+  "properties": {
+    "format_id": {"const": "vfxforge-project"},
+    "format_version": {"type": "integer", "minimum": 1},
+    "minimum_reader_version": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "revision": {"type": "integer", "minimum": 0},
+    "name": {"type": "string", "minLength": 1},
+    "created_utc": {"type": "string", "format": "date-time"},
+    "modified_utc": {"type": "string", "format": "date-time"},
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["time", "angle", "spatial"],
+      "properties": {
+        "time": {"const": "seconds"},
+        "angle": {"enum": ["radians", "degrees"]},
+        "spatial": {"const": "pixels"}
+      }
+    },
+    "color_space": {"enum": ["srgb", "linear-srgb"]},
+    "alpha_mode": {"enum": ["straight", "premultiplied"]},
+    "asset_index": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/asset"}
+    },
+    "effects": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/effect"}
+    },
+    "settings": {"type": "object"},
+    "extension_data": {"type": "object"}
+  },
+  "$defs": {
+    "rational_fps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": {"type": "integer", "minimum": 1, "maximum": 1000000},
+        "denominator": {"type": "integer", "minimum": 1, "maximum": 1000000}
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "kind", "path", "sha256", "size_bytes"],
+      "properties": {
+        "asset_id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["image", "font", "lut", "curve", "other"]},
+        "path": {"type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+"},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "media_type": {"type": "string"},
+        "source_path_hint": {"type": "string"}
+      }
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["effect_id", "name", "graph_path", "duration_seconds", "fps", "canvas"],
+      "properties": {
+        "effect_id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "graph_path": {"type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+"},
+        "duration_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "fps": {"$ref": "#/$defs/rational_fps"},
+        "seed": {"type": "integer", "minimum": 0},
+        "canvas": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height"],
+          "properties": {
+            "width": {"type": "integer", "minimum": 1, "maximum": 32768},
+            "height": {"type": "integer", "minimum": 1, "maximum": 32768}
+          }
+        },
+        "pivot": {
+          "type": "array",
+          "items": {"type": "number"},
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "bounds": {
+          "type": "array",
+          "items": {"type": "number"},
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "extension_data": {"type": "object"}
+      }
+    }
+  }
+}
