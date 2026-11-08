@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vfxforge.local/schemas/graph-patch.schema.json",
+  "title": "VFXForge Graph Patch",
+  "description": "A constrained preview/apply patch against one project revision. Semantic validation, authorization, node/socket lookup, write-set conflicts, cycle checks and resource budgets are enforced by the host, not this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "patch_id",
+    "project_id",
+    "expected_revision",
+    "target_effect_id",
+    "read_set",
+    "write_set",
+    "operations",
+    "risk_level",
+    "resource_budget",
+    "requires_approval"
+  ],
+  "properties": {
+    "patch_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expected_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "target_effect_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "read_set": {
+      "description": "Host-derived stable entity/node/parameter/socket IDs whose current values were used to construct this patch. The host derives and owns this set; never trust model-provided IDs without canonical validation.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "write_set": {
+      "description": "Host-derived stable entity/node/parameter/socket IDs this patch may change. The host derives and owns this set from validated operations; never trust model-provided IDs without canonical validation.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "risk_level": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "destructive"
+      ]
+    },
+    "resource_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_operations": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_nodes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_particles": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_texture_dimension": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "preview_timeout_ms": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "effect_id", "name", "graph_id"],
+            "properties": {
+              "op": {"const": "create_effect"},
+              "effect_id": {"type": "string", "minLength": 1},
+              "name": {"type": "string", "minLength": 1},
+              "graph_id": {"type": "string", "minLength": 1},
+              "duration_seconds": {"type": "number", "exclusiveMinimum": 0}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "node_id", "type_id", "version", "position", "parameters"],
+            "properties": {
+              "op": {"const": "add_node"},
+              "node_id": {"type": "string", "minLength": 1},
+              "type_id": {"type": "string", "minLength": 1},
+              "version": {"type": "string", "minLength": 1},
+              "position": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+              "parameters": {"type": "object"}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "node_id"],
+            "properties": {
+              "op": {"const": "remove_node"},
+              "node_id": {"type": "string", "minLength": 1}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "from_node", "from_socket", "to_node", "to_socket"],
+            "properties": {
+              "op": {"const": "connect"},
+              "from_node": {"type": "string", "minLength": 1},
+              "from_socket": {"type": "string", "minLength": 1},
+              "to_node": {"type": "string", "minLength": 1},
+              "to_socket": {"type": "string", "minLength": 1}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "from_node", "from_socket", "to_node", "to_socket"],
+            "properties": {
+              "op": {"const": "disconnect"},
+              "from_node": {"type": "string", "minLength": 1},
+              "from_socket": {"type": "string", "minLength": 1},
+              "to_node": {"type": "string", "minLength": 1},
+              "to_socket": {"type": "string", "minLength": 1}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "node_id", "parameter_id", "value"],
+            "properties": {
+              "op": {"const": "set_parameter"},
+              "node_id": {"type": "string", "minLength": 1},
+              "parameter_id": {"type": "string", "minLength": 1},
+              "value": {}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "node_id", "parameter_id", "keyframe_id", "time_seconds", "value"],
+            "properties": {
+              "op": {"const": "set_keyframe"},
+              "node_id": {"type": "string", "minLength": 1},
+              "parameter_id": {"type": "string", "minLength": 1},
+              "keyframe_id": {"type": "string", "minLength": 1},
+              "time_seconds": {"type": "number", "minimum": 0},
+              "value": {},
+              "interpolation": {"enum": ["constant", "linear", "bezier"]}
+            }
+          }
+        ]
+      }
+    },
+    "preview_id": {
+      "type": ["string", "null"]
+    },
+    "requires_approval": {
+      "type": "boolean",
+      "const": true
+    }
+  }
+}

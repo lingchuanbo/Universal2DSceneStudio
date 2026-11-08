@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VFXForge AI Tool Descriptor",
+  "type": "object",
+  "required": [
+    "name",
+    "version",
+    "description",
+    "read_only",
+    "input_schema",
+    "required_capabilities"
+  ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "read_only": {
+      "type": "boolean"
+    },
+    "requires_confirmation": {
+      "type": "boolean"
+    },
+    "required_capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "input_schema": {
+      "type": "object"
+    },
+    "output_schema": {
+      "type": "object"
+    }
+  }
+}
