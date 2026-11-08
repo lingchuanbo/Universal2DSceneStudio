@@ -1,10 +1,10 @@
 # 07 Provider、UI、插件与导出
 ## AI Provider
-统一 Provider Interface：Chat/Reasoning、Vision、Image Generation、可选 Video Generation、Embedding/Retrieval、Local Inference。云端适合复杂推理和高质量生成；本地适合隐私、低延迟和离线任务。支持 ONNX Runtime 或外部推理 Worker。
+P0 采用用户自带云端 API Key（BYOK），首个 Adapter 以 OpenAI-compatible Chat Completions + JSON mode/schema 子集验证结构化 Plan/Patch；具体服务商和 model 待确认并实测。Key 用 Windows Credential Manager/OS 等效 Secret Store 保存，不写入 Project、Activity、日志或导出。P0 不承诺 Vision、图像/视频生成、Embedding、本地推理、多 Provider 自动路由；后续可在 Provider Adapter 稳定后扩展。
 
-Router 根据任务类型、质量、延迟、成本、隐私和模型能力选模型。用户可锁定 Provider；不得后台切换到未授权服务。视觉反馈闭环：生成 Graph → Render Preview → Vision 检查颜色/密度/层次 → 参数迭代 → 用户确认。模型判断只是建议，真实参数和编译诊断以软件为准。
+P0 不启用 Provider Router：用户显式选择单一 Provider/model 和连接配置，未经同意不得切换或把 Context 发往其他服务。视觉反馈以运行时渲染预览和用户检查为准；Vision 模型评价属于后续阶段。模型输出只是结构化编辑提议，实际节点语义和编译诊断由软件校验。
 
-每次 AI Task 保存用户请求、Context Snapshot、Provider/Model、Prompt 版本、Tool Calls、Graph Patch、Preview、Apply/Reject、耗时和可用成本统计。
+每次 AI Task 仅保存隐私受限的意图摘要、context/patch digest、Provider/Model、共享数据类别、revision、transaction/undo 关联、Preview/Apply/Reject/失败状态、耗时和错误码。原始 Prompt 默认不持久化；API Key、HTTP headers/body 永不写入工程/Activity。记录格式见 [`ai-task-record.schema.json`](schemas/ai-task-record.schema.json)。
 
 ## UI 布局
 ```text
@@ -29,4 +29,4 @@ AI Edit 面板显示当前理解/假设、引用对象、修改计划、参数�
 ## 资产与导出
 目标资产类型包括 Image/Texture、Sprite Sheet、SVG、Curve、LUT、Font、Node Group、Preset、Simulation Cache；最小版本优先保证实际用到的纹理和效果资源可追踪、可迁移。
 
-首个导出格式须由目标游戏运行时决策确定。候选项：透明图像序列、Sprite Sheet + Atlas JSON、Effect Runtime Data JSON，以及后续按需求支持的 PNG/EXR、MP4/WebM、GIF。所有运行时数据明确帧率、图集、Pivot、Bounds、事件、颜色/Alpha 约定、参数曲线和依赖版本。
+P0 固定为引擎无关的透明 PNG 序列与 Sprite Sheet + Atlas JSON，数据结构见 `schemas/export-profile.schema.json` 和 `schemas/atlas-manifest.schema.json`，实现约定见文档 12。Atlas 记录有理数 FPS、帧区间、canvas、pivot/bounds、颜色/Alpha、纹理 hash、packing 与每帧 rect/trim metadata。Unity/Unreal/Godot 原生 Runtime 插件及 Effect Runtime Data JSON 延后，不将序列帧导出描述为引擎内实时粒子效果。

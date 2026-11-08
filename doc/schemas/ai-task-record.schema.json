@@ -11,7 +11,7 @@
     "project_id": {"type": "string", "minLength": 1},
     "created_utc": {"type": "string", "format": "date-time"},
     "status": {"enum": ["planned", "preview_ready", "awaiting_approval", "applied", "rejected", "canceled", "failed", "stale_revision"]},
-    "intent_summary": {"type": "string", "maxLength": 2000},
+    "intent_summary": {"type": "string", "maxLength": 2000, "description": "Redacted summary only; raw user prompt is not persisted in P0."},
     "context_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "base_revision": {"type": "integer", "minimum": 0},
     "applied_revision": {"type": ["integer", "null"], "minimum": 0},

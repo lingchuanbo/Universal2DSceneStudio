@@ -21,7 +21,7 @@
       "required": ["time", "angle", "spatial"],
       "properties": {
         "time": {"const": "seconds"},
-        "angle": {"enum": ["radians", "degrees"]},
+        "angle": {"const": "radians"},
         "spatial": {"const": "pixels"}
       }
     },
@@ -58,8 +58,7 @@
         "path": {"type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+"},
         "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
         "size_bytes": {"type": "integer", "minimum": 0},
-        "media_type": {"type": "string"},
-        "source_path_hint": {"type": "string"}
+        "media_type": {"type": "string"}
       }
     },
     "effect": {

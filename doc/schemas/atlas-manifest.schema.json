@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vfxforge.local/schemas/atlas-manifest.schema.json",
+  "title": "VFXForge Sprite Sheet Atlas Manifest",
+  "description": "Engine-independent P0 sprite sheet metadata. Origin is top-left. Rects are integer half-open pixel rectangles [x,y,width,height]. Frame rotation is not supported in P0.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "schema_version", "effect_id", "fps", "frame_range", "canvas", "pivot", "bounds", "color_space", "alpha_mode", "texture", "packing", "frames"],
+  "properties": {
+    "schema_id": {"const": "vfxforge-atlas"},
+    "schema_version": {"type": "integer", "minimum": 1},
+    "effect_id": {"type": "string", "minLength": 1},
+    "effect_name": {"type": "string"},
+    "fps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": {"type": "integer", "minimum": 1, "maximum": 1000000},
+        "denominator": {"type": "integer", "minimum": 1, "maximum": 1000000}
+      }
+    },
+    "frame_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_inclusive", "end_exclusive"],
+      "properties": {
+        "start_inclusive": {"type": "integer", "minimum": 0},
+        "end_exclusive": {"type": "integer", "minimum": 1}
+      }
+    },
+    "canvas": {"$ref": "#/$defs/size"},
+    "pivot": {"$ref": "#/$defs/vec2"},
+    "bounds": {"$ref": "#/$defs/bounds"},
+    "color_space": {"enum": ["srgb", "linear-srgb"]},
+    "alpha_mode": {"enum": ["straight", "premultiplied"]},
+    "packing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["padding", "extrude", "rotated"],
+      "properties": {
+        "padding": {"type": "integer", "minimum": 0},
+        "extrude": {"type": "integer", "minimum": 0},
+        "rotated": {"const": false},
+        "trim_transparent": {"type": "boolean"}
+      }
+    },
+    "texture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256", "media_type"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "size": {"$ref": "#/$defs/size"},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "media_type": {"const": "image/png"}
+      }
+    },
+    "frames": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/frame"}
+    }
+  },
+  "$defs": {
+    "size": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1}
+      }
+    },
+    "vec2": {
+      "type": "array",
+      "items": {"type": "number"},
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "rect": {
+      "type": "array",
+      "items": {"type": "integer", "minimum": 0},
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "bounds": {
+      "type": "array",
+      "items": {"type": "number"},
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index", "time_seconds", "rect", "original_size", "trim_offset", "trimmed"],
+      "properties": {
+        "index": {"type": "integer", "minimum": 0},
+        "time_seconds": {"type": "number", "minimum": 0},
+        "rect": {"$ref": "#/$defs/rect"},
+        "original_size": {"$ref": "#/$defs/size"},
+        "trim_offset": {"$ref": "#/$defs/vec2"},
+        "trimmed": {"type": "boolean"}
+      }
+    }
+  }
+}

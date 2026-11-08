@@ -13,7 +13,7 @@
 ## 2. 已核对的上游信息
 
 - 上游定位为从 Blender UI 交互/控件中拆出的独立库，核心是 C kit，并提供 Rust `blenderui` 绑定；Rust 使用 gpui 风格 API、HTML/CSS 与 Tailwind/`rsx!`，布局使用 Taffy。
-- Rust crate 需 Rust 1.88+、CMake 和 C 编译器；Linux 还需 X11 开发头文件。当前文档描述的 native host 为 Windows Win32、Linux X11 和实验中的 macOS Cocoa。
+- Rust crate 需 Rust 1.88+、CMake 和 C 编译器；上游列出 Win32、Linux X11 和实验中的 macOS Cocoa。**本产品 P0 仅将 Windows 10/11 x64 Win32 host 纳入支持与验收范围**；其余平台不构成首版承诺。
 - 上游将软件光栅作为默认 UI 渲染路径，GPU UI 渲染器当前列出 Windows Direct3D 11 和 Linux OpenGL 3.3。该 UI 渲染器不是 wgpu，也不能假设与项目 VFX 视口共用 GPU Device/纹理。
 - 上游 README 说明 45 个 Blender widgets/editors 中仅有 10 个可从 Rust/JavaScript 使用；其节点编辑器示例展示在 Python 路径。不能推断 Rust crate 已提供可直接投入生产的 Node Editor。
 - BUI README 明列无障碍支持和输入法支持尚未完成。中文输入、屏幕阅读器、键盘导航和高 DPI 操作必须进行实测。
@@ -53,7 +53,7 @@ Viewport Renderer（独立所有权）
 
 ### 原型 C：实时视口互操作
 
-将 wgpu 渲染的固定 Seed 粒子/拖尾预览显示在 BUI 窗口的主视口区域。至少验证：持续动画、参数改变响应、透明 Alpha、色彩空间、缩放与 HiDPI、窗口 resize/最小化/恢复、设备丢失、无 GPU 降级、Windows/Linux 目标 API 和帧同步。记录 GPU 资源复制/共享方式与 P50/P95 输入到画面延迟；确认不会因 UI repaint 或主线程阻塞而卡顿。
+验证渲染 Surface 能否嵌入 BUI 主视口。P0 参考路径为 CPU Runtime 产帧供 UI 显示；若评估 wgpu，则记录其作为候选后端，不把 GPU 标为首版硬依赖。测试固定 Seed 动画、参数响应、Alpha/色彩空间、缩放/HiDPI、窗口 resize/最小化/恢复、设备丢失与无 GPU 降级。只对 Windows 10/11 x64 测试；记录资源复制/共享方式与 P50/P95 输入到画面延迟。
 
 ### 原型 D：目标用户走查
 
